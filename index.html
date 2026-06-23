@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Museu dos Carros Antigos</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#f2f2f2;
+color:#222;
+}
+
+header{
+background:#111;
+color:white;
+padding:20px;
+text-align:center;
+}
+
+header h1{
+color:#f1c40f;
+}
+
+.search{
+text-align:center;
+margin:20px;
+}
+
+.search input{
+padding:10px;
+width:80%;
+max-width:400px;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+.container{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+padding:20px;
+max-width:1200px;
+margin:auto;
+}
+
+.card{
+background:white;
+border-radius:10px;
+overflow:hidden;
+box-shadow:0 5px 15px rgba(0,0,0,0.2);
+transition:.3s;
+}
+
+.card:hover{
+transform:scale(1.03);
+}
+
+.card img{
+width:100%;
+height:180px;
+object-fit:cover;
+}
+
+.card-content{
+padding:15px;
+}
+
+button{
+background:#f39c12;
+border:none;
+padding:10px;
+width:100%;
+cursor:pointer;
+color:white;
+border-radius:5px;
+margin-top:10px;
+}
+
+button:hover{
+background:#e67e22;
+}
+
+.modal{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.8);
+display:none;
+justify-content:center;
+align-items:center;
+padding:20px;
+}
+
+.modal-content{
+background:white;
+max-width:800px;
+width:100%;
+border-radius:10px;
+overflow-y:auto;
+max-height:90vh;
+}
+
+.modal img{
+width:100%;
+height:300px;
+object-fit:cover;
+}
+
+.modal-body{
+padding:20px;
+}
+
+.close{
+float:right;
+cursor:pointer;
+font-size:25px;
+color:red;
+}
+
+h3{
+margin-top:15px;
+color:#e67e22;
+}
+
+ul{
+margin-left:20px;
+margin-top:10px;
+}
+
+table{
+width:100%;
+margin-top:10px;
+border-collapse:collapse;
+}
+
+td{
+border:1px solid #ddd;
+padding:8px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🚗 Museu dos Carros Antigos</h1>
+<p>Fusca • Mustang • Camaro • Caravan • Omega</p>
+</header>
+
+<div class="search">
+<input type="text" id="search" placeholder="Pesquisar carro..." onkeyup="filtrar()">
+</div>
+
+<div class="container" id="lista"></div>
+
+<div class="modal" id="modal">
+<div class="modal-content">
+
+<span class="close" onclick="fechar()">&times;</span>
+
+<img id="img">
+
+<div class="modal-body">
+
+<h2 id="nome"></h2>
+
+<h3>História</h3>
+<p id="historia"></p>
+
+<h3>Informações Gerais</h3>
+
+<table>
+<tr><td>Fabricante</td><td id="fab"></td></tr>
+<tr><td>Origem</td><td id="origem"></td></tr>
+<tr><td>Produção</td><td id="producao"></td></tr>
+<tr><td>Unidades</td><td id="unidades"></td></tr>
+</table>
+
+<h3>Variações</h3>
+<ul id="variacoes"></ul>
+
+<h3>Ficha Técnica</h3>
+<ul id="ficha"></ul>
+
+<h3>Curiosidades</h3>
+<ul id="curiosidades"></ul>
+
+</div>
+</div>
+</div>
+
+<script>
+
+const carros = [
+
+{
+nome:"Volkswagen Fusca",
+img:"https://tse4.mm.bing.net/th/id/OIP.UMn7a4TAo5iEUnnfHZ6xJgHaE8?rs=1&pid=ImgDetMain&o=7&rm=3",
+historia:"Um dos carros mais famosos da história, produzido por décadas e símbolo mundial.",
+fab:"Volkswagen",
+origem:"Alemanha",
+producao:"1938 - 2003",
+unidades:"21 milhões",
+variacoes:["1200","1300","1500","1600","Super Beetle"],
+ficha:["Motor 1.3 Boxer","46 cv","125 km/h","Manual 4 marchas"],
+curiosidades:["Carro mais popular do mundo","Produzido por mais de 60 anos"]
+},
+
+{
+nome:"Ford Mustang 1967",
+img:"https://cdn.dealeraccelerate.com/coyote/1/367/24621/1920x1440/1967-ford-mustang",
+historia:"Criou o segmento muscle car nos EUA.",
+fab:"Ford",
+origem:"EUA",
+producao:"1964 - hoje",
+unidades:"10 milhões+",
+variacoes:["Hardtop","Fastback","Convertible","Shelby GT"],
+ficha:["V8 4.7L","271 cv","193 km/h"],
+curiosidades:["Ícone dos muscle cars","Muito usado em filmes"]
+},
+
+{
+nome:"Chevrolet Camaro 1969",
+img:"https://tse4.mm.bing.net/th/id/OIP.0zbgd3WBhCPPgTGt_9kyzwHaFm?rs=1&pid=ImgDetMain&o=7&rm=3",
+historia:"Criado para competir com o Mustang.",
+fab:"Chevrolet",
+origem:"EUA",
+producao:"1966 - hoje",
+unidades:"5 milhões+",
+variacoes:["RS","SS","Z28","COPO"],
+ficha:["V8 5.7L","255 cv","210 km/h"],
+curiosidades:["Muito valorizado hoje","Clássico americano"]
+},
+
+{
+nome:"Chevrolet Caravan 1978",
+img:"caravan 1978.jpg",
+historia:"Perua do Opala, muito usada no Brasil.",
+fab:"Chevrolet",
+origem:"Brasil",
+producao:"1975 - 1992",
+unidades:"300 mil+",
+variacoes:["Standard","Luxo","Comodoro","SS"],
+ficha:["4cc 2.5 / 6cc 4.1","80-171 cv","170 km/h"],
+curiosidades:["Muito usada por famílias","Versão SS rara"]
+},
+
+{
+nome:"Chevrolet Omega 1995",
+img:"omega 95.jpg",
+historia:"Sedã de luxo que substituiu o Opala no Brasil.",
+fab:"Chevrolet",
+origem:"Brasil",
+producao:"1992 - 1998",
+unidades:"92 mil",
+variacoes:["GLS","CD","Suprema"],
+ficha:["6cc 3.0","165 cv","220 km/h"],
+curiosidades:["Carro muito moderno na época","Luxo dos anos 90"]
+}
+
+];
+
+function render(lista){
+
+let html="";
+
+lista.forEach((c,i)=>{
+
+html += `
+<div class="card">
+<img src="${c.img}" alt="${c.nome}">
+<div class="card-content">
+<h3>${c.nome}</h3>
+<p>${c.fab}</p>
+<button onclick="abrir(${i})">Ver detalhes</button>
+</div>
+</div>
+`;
+
+});
+
+document.getElementById("lista").innerHTML = html;
+}
+
+render(carros);
+
+function abrir(i){
+
+const c = carros[i];
+
+document.getElementById("modal").style.display = "flex";
+
+document.getElementById("img").src = c.img;
+document.getElementById("nome").innerText = c.nome;
+document.getElementById("historia").innerText = c.historia;
+
+document.getElementById("fab").innerText = c.fab;
+document.getElementById("origem").innerText = c.origem;
+document.getElementById("producao").innerText = c.producao;
+document.getElementById("unidades").innerText = c.unidades;
+
+document.getElementById("variacoes").innerHTML =
+c.variacoes.map(v => `<li>${v}</li>`).join("");
+
+document.getElementById("ficha").innerHTML =
+c.ficha.map(v => `<li>${v}</li>`).join("");
+
+document.getElementById("curiosidades").innerHTML =
+c.curiosidades.map(v => `<li>${v}</li>`).join("");
+}
+
+function fechar(){
+document.getElementById("modal").style.display = "none";
+}
+
+function filtrar(){
+
+let valor = document.getElementById("search").value.toLowerCase();
+
+let filtrado = carros.filter(c =>
+c.nome.toLowerCase().includes(valor)
+);
+
+render(filtrado);
+}
+
+window.onclick = function(e){
+if(e.target === document.getElementById("modal")){
+fechar();
+}
+}
+
+</script>
+
+</body>
+</html>
